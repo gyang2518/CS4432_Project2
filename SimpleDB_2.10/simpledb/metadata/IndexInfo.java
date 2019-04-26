@@ -8,6 +8,7 @@ import simpledb.record.*;
 import simpledb.index.Index;
 import simpledb.index.hash.HashIndex; 
 import simpledb.index.btree.BTreeIndex; //in case we change to btree indexing
+import simpledb.index.hash.ExtensibleIndex;
 
 
 /**
@@ -19,7 +20,7 @@ import simpledb.index.btree.BTreeIndex; //in case we change to btree indexing
  * @author Edward Sciore
  */
 public class IndexInfo {
-   private String idxname, fldname;
+   private String type,idxname, fldname;
    private Transaction tx;
    private TableInfo ti;
    private StatInfo si;
@@ -31,11 +32,14 @@ public class IndexInfo {
     * @param fldname the name of the indexed field
     * @param tx the calling transaction
     */
-   public IndexInfo(String idxname, String tblname, String fldname,
+   public IndexInfo(String type,String idxname, String tblname, String fldname,
                     Transaction tx) {
+	   this.type = type;
       this.idxname = idxname;
       this.fldname = fldname;
       this.tx = tx;
+      
+      System.out.println("There INfo\n");
       ti = SimpleDB.mdMgr().getTableInfo(tblname, tx);
       si = SimpleDB.mdMgr().getStatInfo(tblname, ti, tx);
    }
@@ -46,8 +50,23 @@ public class IndexInfo {
     */
    public Index open() {
       Schema sch = schema();
+      
+      if(type.equals("sh")){
       // Create new HashIndex for hash indexing
-      return new HashIndex(idxname, sch, tx);
+    	  System.out.println("There open sh\n");
+      return new HashIndex(idxname, sch, tx);}
+      else if(type.equals("bt")) {
+    	  System.out.println("There open bt\n");
+    	  return new BTreeIndex(idxname,sch,tx);
+    	  
+      }else if(type.equals("eh")){
+    	  System.out.println("There open eh\n");
+    	  return new ExtensibleIndex(idxname,sch,tx);
+      }else {
+    	  System.out.println("There open else\n");
+    	  return new HashIndex(idxname,sch,tx);
+      }
+      
    }
    
    /**
@@ -62,11 +81,11 @@ public class IndexInfo {
     * @return the number of block accesses required to traverse the index
     */
    public int blocksAccessed() {
-      TableInfo idxti = new TableInfo("", schema());
-      int rpb = BLOCK_SIZE / idxti.recordLength();
-      int numblocks = si.recordsOutput() / rpb;
-      // Call HashIndex.searchCost for hash indexing
-      return HashIndex.searchCost(numblocks, rpb);
+	   TableInfo idxti = new TableInfo("", schema());
+		int rpb = BLOCK_SIZE / idxti.recordLength();
+		int numblocks = si.recordsOutput() / rpb;
+		// Call HashIndex.searchCost for hash indexing
+		return HashIndex.searchCost(numblocks, rpb);
    }
    
    /**
