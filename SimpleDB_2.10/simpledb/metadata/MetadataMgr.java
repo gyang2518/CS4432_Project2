@@ -33,14 +33,8 @@ public class MetadataMgr {
       return viewmgr.getViewDef(viewname, tx);
    }
    
-   public void createIndex(String type, String idxname, String tblname, String fldname, Transaction tx) {
-	   System.out.println("There create\n");
-      idxmgr.createIndex(type,idxname, tblname, fldname, tx);
-   }
-   
    public void createIndex(String idxname, String tblname, String fldname, Transaction tx) {
-	   System.out.println("There create sh\n");
-      idxmgr.createIndex("sh",idxname, tblname, fldname, tx);
+      idxmgr.createIndex(idxname, tblname, fldname, tx);
    }
    
    public Map<String,IndexInfo> getIndexInfo(String tblname, Transaction tx) {
